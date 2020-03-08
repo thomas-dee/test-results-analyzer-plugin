@@ -163,7 +163,7 @@ Search: <input id="filter" class="table-filter" type="text" placeholder="Test/Cl
 			jQuery("#chartDataType").val("passfail");
 		}
 		setCustomStatuses();
-		populateTemplate();
+		populateTemplate(${it.expandDefault});
 	});
 
 	jQuery("#settingsmenubutton").click(function () {

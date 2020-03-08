@@ -8,13 +8,14 @@ import org.jenkinsci.plugins.testresultsanalyzer.config.UserConfig;
 import org.jenkinsci.plugins.testresultsanalyzer.result.data.ResultData;
 import org.jenkinsci.plugins.testresultsanalyzer.result.info.Info;
 import org.jenkinsci.plugins.testresultsanalyzer.result.info.ResultInfo;
+import org.jenkinsci.plugins.testresultsanalyzer.BuildDescription;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class JsTreeUtil {
 
-    public JSONObject getJsTree(List<Integer> builds, ResultInfo resultInfo, boolean hideConfigMethods) {
+    public JSONObject getJsTree(List<Integer> builds, List<BuildDescription> buildDescriptions, ResultInfo resultInfo, boolean hideConfigMethods) {
         JSONObject tree = new JSONObject();
 
         JSONArray buildJson = new JSONArray();
@@ -29,6 +30,16 @@ public class JsTreeUtil {
         }
         tree.put("results", results);
 
+        if (buildDescriptions.size() > 0) {
+            JSONArray buildDescriptionsJs = new JSONArray();
+            for (BuildDescription descr : buildDescriptions) {
+                JSONObject obj = new JSONObject();
+                obj.put("short", descr.getShort());
+                obj.put("long", descr.getLong());
+                buildDescriptionsJs.add(obj);
+            }
+            tree.put("buildDescriptions", buildDescriptionsJs);
+        }
         return tree;
     }
 

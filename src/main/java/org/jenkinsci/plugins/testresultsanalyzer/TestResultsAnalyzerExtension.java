@@ -57,8 +57,10 @@ public class TestResultsAnalyzerExtension extends TransientActionFactory<Job> im
         private boolean showBarGraph = true;
         private boolean showPieGraph = true;
         private boolean hideConfigurationMethods = false;
+        private boolean expandDefault = false;
         private String runTimeLowThreshold = "0.5";
         private String runTimeHighThreshold = "1.0";
+        private String buildDescrConf = "";
 
         private static final String passFailString = "passfail";
         private static final String runtimeString = "runtime";
@@ -101,6 +103,8 @@ public class TestResultsAnalyzerExtension extends TransientActionFactory<Job> im
                 runTimeLowThreshold = formData.getString("runTimeLowThreshold");
                 runTimeHighThreshold = formData.getString("runTimeHighThreshold");
                 chartDataType = formData.getString("chartDataType");
+                expandDefault = formData.getBoolean("expandDefault");
+                buildDescrConf = formData.getString("buildDescrConf");
                 if (formData.containsKey("useCustomStatusNames")) {
                     JSONObject customData = formData.getJSONObject("useCustomStatusNames");
                     useCustomStatusNames = true;
@@ -152,6 +156,14 @@ public class TestResultsAnalyzerExtension extends TransientActionFactory<Job> im
 
 		public boolean getHideConfigurationMethods() {
 			return hideConfigurationMethods;
+		}
+
+		public boolean getExpandDefault() {
+			return expandDefault;
+		}
+
+		public String getBuildDescriptionConfiguration() {
+			return buildDescrConf;
 		}
 
         public boolean getShowBuildTime() { return showBuildTime; }

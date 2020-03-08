@@ -2,6 +2,8 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.testresultsanalyzer.JsTreeUtil;
 import org.jenkinsci.plugins.testresultsanalyzer.result.info.ResultInfo;
+import org.jenkinsci.plugins.testresultsanalyzer.BuildDescription;
+
 import org.junit.Assert;
 import org.junit.Test;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -16,24 +18,27 @@ public class JsTreeUtilTest {
     @Test
     public void noRequiredBuildsAndNoTestCases() {
         List<Integer> builds = new ArrayList<Integer>();
+        List<BuildDescription> buildDescriptions = new ArrayList<BuildDescription>();
         ResultInfo results = new ResultInfo();
 
         JSONObject expected = buildRoot(jsonArray(), jsonArray());
-        assertEquals(expected, new JsTreeUtil().getJsTree(builds, results, false));
+        assertEquals(expected, new JsTreeUtil().getJsTree(builds, buildDescriptions, results, false));
     }
 
     @Test
     public void requiresBuildsButHasNoTestCases() {
         List<Integer> builds = Arrays.asList(9, 7, 6);
+        List<BuildDescription> buildDescriptions = new ArrayList<BuildDescription>();
         ResultInfo results = new ResultInfo();
 
         JSONObject expected = buildRoot(jsonArray("9", "7", "6"), jsonArray());
-        assertEquals(expected, new JsTreeUtil().getJsTree(builds, results, false));
+        assertEquals(expected, new JsTreeUtil().getJsTree(builds, buildDescriptions, results, false));
     }
 
     @Test
     public void requiresBuildsButHasJustOneTestCase() {
         List<Integer> builds = Arrays.asList(9, 7);
+        List<BuildDescription> buildDescriptions = new ArrayList<BuildDescription>();
         ResultInfo results = new ResultInfo();
 
         FakePackageResult packageFoo = new FakePackageResult("pn")
@@ -50,12 +55,13 @@ public class JsTreeUtilTest {
 
         JSONObject expected = buildRoot(jsonArray("9", "7"), jsonArray(pnNode));
 
-        assertEquals(expected, new JsTreeUtil().getJsTree(builds, results, false));
+        assertEquals(expected, new JsTreeUtil().getJsTree(builds, buildDescriptions, results, false));
     }
 
     @Test
     public void onePassedAndSkippedTestLeadsToPassed() {
         List<Integer> builds = Arrays.asList(1);
+        List<BuildDescription> buildDescriptions = new ArrayList<BuildDescription>();
         ResultInfo results = new ResultInfo();
 
         FakePackageResult packageFoo = new FakePackageResult("pn")
@@ -75,12 +81,13 @@ public class JsTreeUtilTest {
 
         JSONObject expected = buildRoot(jsonArray("1"), jsonArray(pnNode));
 
-        assertEquals(expected, new JsTreeUtil().getJsTree(builds, results, false));
+        assertEquals(expected, new JsTreeUtil().getJsTree(builds, buildDescriptions, results, false));
     }
 
     @Test
     public void onePassedAndFailedTestLeadsToFailed() {
         List<Integer> builds = Arrays.asList(1);
+        List<BuildDescription> buildDescriptions = new ArrayList<BuildDescription>();
         ResultInfo results = new ResultInfo();
 
         FakePackageResult packageFoo = new FakePackageResult("pn")
@@ -100,7 +107,7 @@ public class JsTreeUtilTest {
 
         JSONObject expected = buildRoot(jsonArray("1"), jsonArray(pnNode));
 
-        assertEquals(expected, new JsTreeUtil().getJsTree(builds, results, false));
+        assertEquals(expected, new JsTreeUtil().getJsTree(builds, buildDescriptions, results, false));
     }
 
     private static JSONObject buildRoot(JSONArray builds, JSONArray results) {

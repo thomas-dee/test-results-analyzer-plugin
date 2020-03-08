@@ -5,6 +5,9 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.Actionable;
 import hudson.model.Run;
+import hudson.model.ParametersAction;
+import hudson.model.ParameterValue;
+
 import hudson.tasks.test.AggregatedTestResultAction;
 import hudson.tasks.test.TabulatedResult;
 import hudson.tasks.test.AbstractTestResultAction;
@@ -26,6 +29,8 @@ import org.jenkinsci.plugins.testresultsanalyzer.result.data.ResultData;
 import org.jenkinsci.plugins.testresultsanalyzer.result.info.ClassInfo;
 import org.jenkinsci.plugins.testresultsanalyzer.result.info.PackageInfo;
 import org.jenkinsci.plugins.testresultsanalyzer.result.info.TestCaseInfo;
+import org.jenkinsci.plugins.testresultsanalyzer.BuildDescription;
+
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 public class TestResultsAnalyzerAction extends Actionable implements Action {
@@ -33,7 +38,11 @@ public class TestResultsAnalyzerAction extends Actionable implements Action {
 	@SuppressWarnings("rawtypes")
 	Job project;
 	private List<Integer> builds = new ArrayList<Integer>();
+	private List<BuildDescription> buildDescription = new ArrayList<BuildDescription>();
 	private final static Logger LOG = Logger.getLogger(TestResultsAnalyzerAction.class.getName());
+
+	//private final org.jenkinsci.plugins.badge.ParameterResolver parameterResolver = null;
+	private final org.jenkinsci.plugins.badge.ParameterResolver parameterResolver = new org.jenkinsci.plugins.badge.ParameterResolver();
 
 	ResultInfo resultInfo;
 
@@ -123,6 +132,20 @@ public class TestResultsAnalyzerAction extends Actionable implements Action {
 		return buildList;
 	}
 
+	private List<BuildDescription> getBuildDescriptions(int noOfBuilds) {
+		if ((noOfBuilds <= 0) || (noOfBuilds >= builds.size())) {
+			return buildDescription;
+		}
+
+		List<BuildDescription> buildDescriptions = new ArrayList<BuildDescription>();
+
+		for(int i = 0; i < noOfBuilds; i++) {
+			buildDescriptions.add(buildDescription.get(i));
+		}
+
+		return buildDescriptions;
+	}
+
 	private int getNoOfBuildRequired(String noOfbuildsNeeded) {
 		int noOfBuilds;
 		try {
@@ -144,6 +167,59 @@ public class TestResultsAnalyzerAction extends Actionable implements Action {
 		return !(builds.contains(latestBuildNumber));
 	}
 
+	private String getRunParameterValue(Run run, String parameter) {
+		String value = "";
+		ParametersAction params = run.getAction(ParametersAction.class);
+		if (params != null) {
+			ParameterValue valueObj = params.getParameter(parameter);
+			if (valueObj != null) {
+				value = valueObj.getValue().toString();
+			}
+		}
+		return value;
+	}
+
+	private BuildDescription getBuildDescription(Run run, String buildDescriptionConfiguration) {
+		if (buildDescriptionConfiguration.equals("BUILD_DESCRIPTION_CONFIGURATION")) {
+			return getBuildDescription(run, getRunParameterValue(run, buildDescriptionConfiguration));
+		}
+
+		String[] buildDescriptionConfigurationParts = buildDescriptionConfiguration.split(":");
+		List<String> values = new ArrayList<String>();
+
+		values.add(buildDescriptionConfigurationParts[0]);
+		if (buildDescriptionConfigurationParts.length > 1) {
+			values.add(buildDescriptionConfigurationParts[1]);
+		} else {
+			values.add(buildDescriptionConfigurationParts[0]);
+		}
+
+		for (int i = 0; i < values.size(); i ++) {
+			String value = values.get(i);
+
+			if (parameterResolver != null) {
+				value = parameterResolver.resolve(run, value);
+			} else {
+				if (value.equals("buildId")) {
+					value = run.getId();
+				} else if (value.equals("buildNumber")) {
+					value = Integer.toString(run.getNumber());
+				} else if (value.equals("duration")) {
+					value = run.getDurationString();
+				} else if (value.equals("displayName")) {
+					value = run.getDisplayName();
+				} else if (value.equals("description")) {
+					value = run.getDescription();
+				} else {
+					value = getRunParameterValue(run, value);
+				}
+			}
+			values.set(i, value);
+		}
+
+		return new BuildDescription(values.get(0), values.get(1));
+	}
+
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void getJsonLoadData() {
 		if (!isUpdated()) {
@@ -152,6 +228,9 @@ public class TestResultsAnalyzerAction extends Actionable implements Action {
 
 		resultInfo = new ResultInfo();
 		builds = new ArrayList<Integer>();
+		buildDescription = new ArrayList<BuildDescription>();
+
+		String buildDescrConf = getBuildDescriptionConfiguration();
 
 		RunList<Run> runs = null;
 		if (getNoOfRunsToFetch() > 0) {
@@ -166,6 +245,10 @@ public class TestResultsAnalyzerAction extends Actionable implements Action {
 
 			int buildNumber = run.getNumber();
 			builds.add(buildNumber);
+
+			if (!buildDescrConf.isEmpty()) {
+				buildDescription.add(getBuildDescription(run, buildDescrConf));
+			}
 
 			List<AbstractTestResultAction> testActions = run.getActions(AbstractTestResultAction.class);
 			for (AbstractTestResultAction testAction : testActions) {
@@ -211,9 +294,10 @@ public class TestResultsAnalyzerAction extends Actionable implements Action {
 
         int noOfBuilds = getNoOfBuildRequired(userConfig.getNoOfBuildsNeeded());
         List<Integer> buildList = getBuildList(noOfBuilds);
+        List<BuildDescription> buildDescriptions = getBuildDescriptions(noOfBuilds);
 
         JsTreeUtil jsTreeUtils = new JsTreeUtil();
-		return jsTreeUtils.getJsTree(buildList, resultInfo, userConfig.isHideConfigMethods());
+		return jsTreeUtils.getJsTree(buildList, buildDescriptions, resultInfo, userConfig.isHideConfigMethods());
     }
 	
 	@JavaScriptMethod
@@ -318,6 +402,14 @@ public class TestResultsAnalyzerAction extends Actionable implements Action {
 
 	public boolean getHideConfigurationMethods() {
 		return TestResultsAnalyzerExtension.DESCRIPTOR.getHideConfigurationMethods();
+	}
+
+	public boolean getExpandDefault() {
+		return TestResultsAnalyzerExtension.DESCRIPTOR.getExpandDefault();
+	}
+
+	public String getBuildDescriptionConfiguration() {
+		return TestResultsAnalyzerExtension.DESCRIPTOR.getBuildDescriptionConfiguration();
 	}
 
 	public String getChartDataType() {

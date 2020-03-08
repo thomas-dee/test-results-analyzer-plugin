@@ -15,7 +15,6 @@
         background-color: #E8F5FF;
         #background-image: linear-gradient(#84E1F3, #E8F5FF);
         #width: 80%;
-
     }
     .title {
         display: table-caption;
@@ -28,24 +27,20 @@
 		margin-left: 10px;
 	}
 
-
     .table-cell.row-heading {
         text-align: left;
     }
 	
-	.even {
+	.table-row:nth-child(odd) {
 		background: white;
 	}
-	.even:hover {
-		background: #BFC9EC;
-
+	.table-row:nth-child(odd):hover {
+        background: #e8edff;
 	}
-
-
-	.odd {
-
+	.table-row:nth-child(even) {
+        background: #e8edff;
 	}
-	.odd:hover {
+	.table-row:nth-child(even):hover {
 		background: #BFC9EC;
 	}
 
@@ -141,5 +136,39 @@
         margin-top: 10%;
     }
 
-
+	.tooltip {
+		position: relative;
+		cursor: help;
+	}
+	
+	.tooltip:before {
+	  content: "";
+	  position: absolute;
+	  top: 0%;
+	  right: 0%;
+	  border-top: 7px solid red;
+	  border-left: 7px solid transparent;
+	}
+	
+	.tooltip .tooltiptext {
+		visibility: hidden;
+		background-color: white;
+		color: black;
+		font-weight: normal !important;
+		text-align: left;
+		border: 1px solid #ccc;
+		padding: 5px;
+		min-width: 120px;
+		
+		/* Position the tooltip */
+		position: absolute;
+		z-index: 1;
+		top: 105%;
+		left: 0px;
+	}
+	
+	.tooltip:hover .tooltiptext {
+		visibility: visible;
+	}
+	
 	

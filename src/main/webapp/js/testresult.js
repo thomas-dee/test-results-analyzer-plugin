@@ -57,7 +57,7 @@ function reset(){
     resetCharts();
 }
 
-function populateTemplate(){
+function populateTemplate(expandDefault = false){
     reset();
     displayValues  = $j("#show-build-durations").is(":checked");
     $j("#table-loading").show();
@@ -73,6 +73,9 @@ function populateTemplate(){
         addEvents();
         generateCharts();
         $j("#table-loading").hide();
+        if (expandDefault) {
+            expandAll();
+        }
     },this));
 }
 

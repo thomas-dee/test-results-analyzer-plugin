@@ -46,6 +46,15 @@ var tableBody = '<div class="heading">' +
     '\n' + '         <div class="table-cell" title="Build {{this}}">{{this}}</div>' +
     '{{/each}}' +
     '\n' + '      </div>' +
+    '{{#if buildDescriptions}}\n      <div class="heading">' +
+    '\n' + '        <div class="table-cell"></div>' +
+    ' <div class="table-cell"></div>' +
+    ' <div class="table-cell"></div> ' +
+    ' <div class="table-cell"></div> ' +
+    '{{#each buildDescriptions}}' +
+    '\n' + '         <div id="build_description_{{@index}}" class="table-cell{{#if long}} tooltip"><span class="tooltiptext">{{{long}}}</span>{{else}}">{{/if}}<small>{{{short}}}</small></div>' +
+    '{{/each}}' +
+    '\n' + '      </div>{{/if}}' +
     '{{#each results}}' +
     '{{> tableBodyTemplate}}' +
     '\n' + '{{/each}}';

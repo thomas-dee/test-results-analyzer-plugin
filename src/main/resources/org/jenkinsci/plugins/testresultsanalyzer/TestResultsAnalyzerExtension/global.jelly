@@ -16,6 +16,12 @@
 		<f:entry title="${%Hide configuration methods - Only for TestNG results}">
         	<f:checkbox name="hideConfigurationMethods" checked="${descriptor.getHideConfigurationMethods()}" />
         </f:entry>
+		<f:entry title="${%Show Expanded}">
+        	<f:checkbox name="expandDefault" checked="${descriptor.getExpandDefault()}" />
+        </f:entry>
+		<f:entry title="${%Build Description Configuration}">
+			<f:textbox name="buildDescrConf" value="${descriptor.getBuildDescriptionConfiguration()}"/>
+        </f:entry>
 		<f:entry title="${%Show Line Graph}">
 			<f:checkbox name="showLineGraph" checked="${descriptor.getShowLineGraph()}" />
 		</f:entry>
