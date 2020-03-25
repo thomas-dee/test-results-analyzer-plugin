@@ -14,7 +14,7 @@ public class ClassInfo extends Info {
 
 	public void putBuildClassResult(Integer buildNumber, TabulatedResult classResult, String url) {
 		ClassResultData classResultData = new ClassResultData(classResult, url);
-
+		handleProperties(buildNumber, classResult);
 		addTests(buildNumber, classResult, url);
 		this.buildResults.put(buildNumber, classResultData);
 	}
@@ -22,8 +22,8 @@ public class ClassInfo extends Info {
 	public Map<String, TestCaseInfo> getTests() {
 		return tests;
 	}
-	
 
+	
 	private void addTests(Integer buildNumber, TabulatedResult classResult, String url) {
 		for (TestResult testCaseResult : classResult.getChildren()) {
 

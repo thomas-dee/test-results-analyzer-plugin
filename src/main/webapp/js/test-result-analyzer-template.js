@@ -8,16 +8,16 @@ var tableContent = '<div class="table-row" name = "{{addName text}}" ' +
     '\n' + '         ' +
     '\n' + '         ' +
     '\n' + '         <div class="table-cell"><input type="checkbox"/></div> ' +
-    ' <div class="name row-heading table-cell" ' +
+    ' <div class="name row-heading table-cell{{#if description}} tooltip{{/if}}" ' +
         '{{#if hierarchyLevel}}' +
             'style="padding-left:{{addspaces hierarchyLevel}}em;"' +
         '{{/if}}' +
-    '>' +
+        '{{#if description}}><span class="tooltiptext">{{description}}</span>{{else}}>{{/if}}' +
         '{{#if children}}' +
             '<span class="icon icon-plus-sign" title="Show Children"></span> ' +
         '{{/if}}' +
         '<span class="{{failureIconWhenNecessary buildResults}}" title="New Failure" ></span>' +
-        '&nbsp;{{text}}</span>' +
+        '&nbsp;{{#if link}}<a href="{{link}}">{{text}}</a>{{else}}<span>{{text}}</span>{{/if}}' +
     '</div>' +
     '\n' + '<div class="table-cell" title="Builds (Tests)">{{percentPassed buildResults}}</div> ' +
     '\n' + '<div class="table-cell" title="Number of transitions from passed to failed and failed to passed.">{{numberTransitions buildResults}}</div> ' +

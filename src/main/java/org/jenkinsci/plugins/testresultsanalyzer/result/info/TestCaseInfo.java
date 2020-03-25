@@ -9,6 +9,7 @@ public class TestCaseInfo extends Info {
 
 	public void putTestCaseResult(Integer buildNumber, TestResult testCaseResult, String url) {
 		TestCaseResultData testCaseResultData = new TestCaseResultData(testCaseResult, url);
+		handleProperties(buildNumber, testCaseResult);
 		setConfig(testCaseResultData.isConfig());
 		this.buildResults.put(buildNumber, testCaseResultData);
 	}

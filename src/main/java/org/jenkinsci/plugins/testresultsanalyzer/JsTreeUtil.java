@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.testresultsanalyzer;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.jenkinsci.plugins.testresultsanalyzer.config.UserConfig;
@@ -14,7 +15,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class JsTreeUtil {
-
+    
     public JSONObject getJsTree(List<Integer> builds, List<BuildDescription> buildDescriptions, ResultInfo resultInfo, boolean hideConfigMethods) {
         JSONObject tree = new JSONObject();
 
@@ -43,14 +44,19 @@ public class JsTreeUtil {
         return tree;
     }
 
-    private JSONObject createJson(List<Integer> builds, Info info, boolean hideConfigMethods) {
+    private JSONObject createJson(List<Integer> builds, Info info, boolean hideConfigMethods, Map<String, String> properties) {
         JSONObject baseJson = new JSONObject();
 
         baseJson.put("text", info.getName());
         baseJson.put("buildResults", getBuilds(builds, info));
-        baseJson.put("children", getChildren(builds, info, hideConfigMethods));
+        baseJson.put("children", getChildren(builds, info, hideConfigMethods, properties));
 
         return baseJson;
+    }
+
+    private JSONObject createJson(List<Integer> builds, Info info, boolean hideConfigMethods) {
+        Map<String, String> properties = new HashMap<String, String>();
+        return createJson(builds, info, hideConfigMethods, properties);
     }
 
     private JSONArray getBuilds(List<Integer> builds, Info info) {
@@ -61,15 +67,31 @@ public class JsTreeUtil {
         return treeDataJson;
     }
 
-    private JSONArray getChildren(List<Integer> builds, Info info, boolean hideConfigMethods) {
+    private JSONArray getChildren(List<Integer> builds, Info info, boolean hideConfigMethods, Map<String, String> properties) {
         Map<String, ? extends Info> childrenInfo = info.getChildren();
         if (childrenInfo == null)
             return new JSONArray();
-
+    
+        properties.putAll(info.getProperties());
+    
         JSONArray children = new JSONArray();
         for (Map.Entry<String, ? extends Info> entry : childrenInfo.entrySet()) {
             if (!hideConfigMethods || !entry.getValue().isConfig()) {
-                children.add(createJson(builds, entry.getValue(), hideConfigMethods));
+                String name = entry.getValue().getName();
+                JSONObject json = createJson(builds, entry.getValue(), hideConfigMethods, properties);
+                if (properties.containsKey("Description for " + name)) {
+                    String descr = properties.get("Description for " + name);
+                    if (descr != null) {
+                        json.put("description", descr);
+                    }
+                }
+                if (properties.containsKey("DocLink for " + name)) {
+                    String link = properties.get("DocLink for " + name);
+                    if (link != null) {
+                        json.put("link", link);
+                    }
+                }
+                children.add(json);
             }
         }
 
